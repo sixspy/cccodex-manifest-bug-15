@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>湖区清单台</title>
+  <link rel="stylesheet" href="/static/css/manifest.css" />
+</head>
+<body>
+  <div class="shell">
+    <nav>
+      <p class="brand" id="lab-brand">湖区清单台</p>
+      <button type="button" data-tab="batches" class="active">落地批次</button>
+      <button type="button" data-tab="detail">批次详情</button>
+      <button type="button" data-tab="reports">可见性对账</button>
+      <button type="button" class="secondary" id="btn-logout">退出</button>
+    </nav>
+    <main>
+      <p class="muted" id="msg"></p>
+      <div id="view"></div>
+    </main>
+  </div>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
