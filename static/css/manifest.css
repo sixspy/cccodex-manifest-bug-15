@@ -91,3 +91,22 @@ th { color: var(--muted); font-weight: 500; }
 }
 .muted { color: var(--muted); }
 .panel { margin-top: 1rem; padding-top: 0.5rem; border-top: 1px dashed var(--line); }
+.waterline-hint { font-size: 0.82rem; margin: 0.35rem 0 0.6rem; }
+.chip {
+  display: inline-block;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.chip-empty { color: #1a0b12; background: var(--danger); border: 1px solid var(--danger); }
+.chip-placeholder { color: #2a1f05; background: #ffd166; border: 1px solid #ffd166; }
+.chip-withdraw { color: var(--ink); background: transparent; border: 1px solid var(--muted); }
+.pill-warn { color: #ffd166; border-color: #ffd166; }
+.pill-danger { color: var(--danger); border-color: var(--danger); }
+.action-cell { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
+.action-cell button:disabled { opacity: 0.4; cursor: not-allowed; }
+.recheck-row { display: inline-flex; gap: 0.35rem; align-items: center; width: 100%; margin-top: 0.35rem; }
+.recheck-row input { padding: 0.35rem 0.5rem; min-width: 12rem; }
+.recheck-row button { padding: 0.35rem 0.6rem; }

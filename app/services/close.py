@@ -1,5 +1,5 @@
 from app.db import get_db
-from app.services.objects import ServiceError
+from app.services.errors import ServiceError
 
 
 def close_batch(batch_id: int, db_path: str | None = None) -> dict:
@@ -13,6 +13,14 @@ def close_batch(batch_id: int, db_path: str | None = None) -> dict:
             raise ServiceError("批次已闭合", 409)
         if batch["status"] != "收集中":
             raise ServiceError("仅收集中批次可闭合", 409)
+        # 同一水线：空串处置未收口（待复检/已撤回）的批次不得闭合，先于空批判定。
+        pending = conn.execute(
+            "SELECT COUNT(*) AS c FROM landing_objects "
+            "WHERE batch_id=? AND status IN ('待复检','已撤回')",
+            (batch_id,),
+        ).fetchone()["c"]
+        if pending:
+            raise ServiceError(f"批次有 {pending} 个空串处置未收口（待复检/已撤回），不可闭合", 409)
         objs = conn.execute(
             "SELECT id FROM landing_objects WHERE batch_id=? AND status='已登记'",
             (batch_id,),

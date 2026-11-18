@@ -29,6 +29,23 @@ CC_Codex 二期（26.11）**数据工程**产品线：**湖区落地清单台**�
 3. 闭合清单（对象数固化，拒绝空批）
 4. 可见性对账报告（闭合批 vs 开放批 vs 孤儿对象）
 
+## 空指纹治理（manifest-bug-15）
+
+空指纹曾可经页面登记直接落库、去重扫库吃空串。修复后四层设防，页面拦截与后台校验同一判定：
+
+- **校验水线**（`app/services/rules.py`，单一判定源）：指纹去空白后至少 6 位，空串/短串/占位串前后端同拦；规则经 `GET /api/meta` 的 `waterline` 下发，页面不另写一套。
+- **登记硬闸**：服务层 `validate_fingerprint` + 表级 `CHECK(length(trim(content_hash))>0)`，出错回白话（422）。
+- **空串处置双轨（互斥，后端一次裁定）**：
+  - 撤回轨 `POST /api/empty-objects/{id}/dispose {"track":"withdraw"}`：撤登记 → 写 `withdrawal_flows` 撤回流水 → 逼同键重填。
+  - 占位复检轨 `{"track":"placeholder"}`：原子写 `PLACEHOLDER-PENDING-RECHECK:` 占位指纹 → 落 `recheck_vouchers` 凭证 → `POST .../recheck` 强制复检通过才收口。
+  - 两轨互斥：已有待复检凭证则撤回 409，已撤回则占位 409，重复占位 409。
+- **去重编排台** `POST /api/dedup-runs`：空串/撤回记号/占位指纹一律拦截计数（`empty_blocked_count`），不参与去重、不落库，扫库留痕并对照同一凭证号。
+- **并发写锁**：登记/处置走 `BEGIN IMMEDIATE` 单事务，并发灌同键仅 1 条成功，其余 409。
+- **旧库迁移**：历史空串行迁移时自动占位并补复检凭证，强制复检。
+
+四处同查：登记附页、校验水线、空串列表（空串治理台）、去重编排台。
+复现单与隔离复现脚本见 `bug_repro/`（`python -I bug_repro/repro_empty_fingerprint.py`）。
+
 预留切口（未做，供后续功能题）：清单换版生效窗、闭合作废回开放、批量失败闭互斥、跨区依赖冻结、清单回灌等。
 
 ## 本地（推荐反馈环）
